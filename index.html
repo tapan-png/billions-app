@@ -402,11 +402,20 @@ window.addEventListener('message', (e) => {
 });
 
 /* ---------- fit the phone ---------- */
+function safeInsets(){
+  let p = document.getElementById('insetProbe');
+  if (!p){ p = document.createElement('div'); p.id = 'insetProbe'; p.style.cssText = 'position:fixed;left:0;top:0;visibility:hidden;pointer-events:none;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)'; document.body.appendChild(p); }
+  const cs = getComputedStyle(p); return { top: parseFloat(cs.paddingTop) || 0, bottom: parseFloat(cs.paddingBottom) || 0 };
+}
 function fit(){
   if (APP){ // scale the 402px-wide design to the device width and let the height follow the screen
-    const s = window.innerWidth / 402, h = Math.round(window.innerHeight / s);
+    // The designs carry a 54px status-bar band and ~30px of home-indicator space under the tab bar.
+    // Tuck whatever part of them the device doesn't need (a browser has no notch under the page) off screen.
+    const s = window.innerWidth / 402, inset = safeInsets();
+    const cutTop = Math.max(0, 54 * s - inset.top), cutBot = Math.max(0, 20 * s - inset.bottom);
+    const h = Math.round((window.innerHeight + cutTop + cutBot) / s);
     $('phone').style.transform = ''; $('fitbox').style.width = ''; $('fitbox').style.height = '';
-    $('screen').style.cssText = `width:402px;height:${h}px;transform:scale(${s});transform-origin:0 0`;
+    $('screen').style.cssText = `width:402px;height:${h}px;transform:translateY(${-cutTop}px) scale(${s});transform-origin:0 0`;
     Object.values(frames).forEach(f => { f.style.height = h + 'px'; });
     return;
   }
@@ -418,6 +427,8 @@ function fit(){
   $('fitbox').style.height = 902 * z + 'px';
 }
 window.addEventListener('resize', fit);
+if (window.visualViewport) visualViewport.addEventListener('resize', fit);
+window.addEventListener('orientationchange', () => setTimeout(fit, 300));
 fit();
 paintPhase();
 
