@@ -299,7 +299,7 @@ SECTIONS.forEach(s => {
 });
 const APP = document.documentElement.classList.contains('app-mode');
 /* ---------- updates: the hosted app checks version.json and reloads itself when a newer build is out ---------- */
-const BUILD_ID = '20261117053724';
+const BUILD_ID = '20261117053728';
 function ptoast(msg){ const t = document.getElementById('ptoast'); if (!t) return; t.textContent = msg; t.classList.add('on'); clearTimeout(ptoast.t); ptoast.t = setTimeout(() => t.classList.remove('on'), 2200); }
 function hardReload(id){ const u = new URL(location.href); u.searchParams.set('v', id || Date.now()); location.replace(u.toString()); }
 async function checkUpdate(){
